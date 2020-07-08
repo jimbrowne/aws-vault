@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/99designs/aws-vault/v6/funclog"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 )
 
@@ -120,6 +121,7 @@ func withSecurityChecks(next *http.ServeMux) http.HandlerFunc {
 
 func credsHandler(creds *credentials.Credentials) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		funclog.SimpleStack()
 		log.Printf("Credentials.IsExpired() = %#v", creds.IsExpired())
 
 		val, err := creds.Get()

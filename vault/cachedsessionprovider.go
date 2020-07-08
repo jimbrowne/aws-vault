@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/99designs/aws-vault/v6/funclog"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/service/sts"
 )
@@ -21,6 +22,7 @@ type CachedSessionProvider struct {
 // Retrieve returns cached credentials from the keyring, or if no credentials are cached
 // generates a new set of temporary credentials using the CredentialsFunc
 func (p *CachedSessionProvider) Retrieve() (credentials.Value, error) {
+	funclog.SimpleStack()
 	creds, err := p.Keyring.Get(p.SessionKey)
 	if err != nil {
 		// lookup missed, we need to create a new one.

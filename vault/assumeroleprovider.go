@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/99designs/aws-vault/v6/funclog"
 )
 
 // AssumeRoleProvider retrieves temporary credentials from STS using AssumeRole
@@ -24,6 +25,7 @@ type AssumeRoleProvider struct {
 
 // Retrieve generates a new set of temporary credentials using STS AssumeRole
 func (p *AssumeRoleProvider) Retrieve() (credentials.Value, error) {
+        funclog.SimpleStack()
 	role, err := p.assumeRole()
 	if err != nil {
 		return credentials.Value{}, err
@@ -38,6 +40,7 @@ func (p *AssumeRoleProvider) Retrieve() (credentials.Value, error) {
 }
 
 func (p *AssumeRoleProvider) roleSessionName() string {
+        funclog.SimpleStack()
 	if p.RoleSessionName == "" {
 		// Try to work out a role name that will hopefully end up unique.
 		return fmt.Sprintf("%d", time.Now().UTC().UnixNano())
@@ -49,7 +52,9 @@ func (p *AssumeRoleProvider) roleSessionName() string {
 func (p *AssumeRoleProvider) assumeRole() (*sts.Credentials, error) {
 	var err error
 
-	input := &sts.AssumeRoleInput{
+        funclog.SimpleStack()
+
+        input := &sts.AssumeRoleInput{
 		RoleArn:         aws.String(p.RoleARN),
 		RoleSessionName: aws.String(p.roleSessionName()),
 		DurationSeconds: aws.Int64(int64(p.Duration.Seconds())),

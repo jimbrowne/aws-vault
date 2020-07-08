@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/sso"
 	"github.com/aws/aws-sdk-go/service/ssooidc"
 	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/99designs/aws-vault/v6/funclog"
 )
 
 const defaultExpirationWindow = 5 * time.Minute
@@ -21,6 +22,7 @@ const defaultExpirationWindow = 5 * time.Minute
 var UseSessionCache = true
 
 func NewSession(creds *credentials.Credentials, region string) (*session.Session, error) {
+        funclog.SimpleStack()
 	return session.NewSessionWithOptions(session.Options{
 		Config: aws.Config{
 			Region:      aws.String(region),
@@ -43,6 +45,7 @@ type Mfa struct {
 
 // GetMfaToken returns the MFA token
 func (m *Mfa) GetMfaToken() (*string, error) {
+        funclog.SimpleStack()
 	if m.MfaToken != "" {
 		return aws.String(m.MfaToken), nil
 	}
@@ -58,14 +61,17 @@ func (m *Mfa) GetMfaToken() (*string, error) {
 
 // NewMasterCredentialsProvider creates a provider for the master credentials
 func NewMasterCredentialsProvider(k *CredentialKeyring, credentialsName string) *KeyringProvider {
+        funclog.SimpleStack()
 	return &KeyringProvider{k, credentialsName}
 }
 
 func NewMasterCredentials(k *CredentialKeyring, credentialsName string) *credentials.Credentials {
+        funclog.SimpleStack()
 	return credentials.NewCredentials(NewMasterCredentialsProvider(k, credentialsName))
 }
 
 func NewSessionTokenProvider(creds *credentials.Credentials, k keyring.Keyring, config *Config) (credentials.Provider, error) {
+        funclog.SimpleStack()
 	sess, err := NewSession(creds, config.Region)
 	if err != nil {
 		return nil, err
@@ -100,6 +106,7 @@ func NewSessionTokenProvider(creds *credentials.Credentials, k keyring.Keyring, 
 
 // NewAssumeRoleProvider returns a provider that generates credentials using AssumeRole
 func NewAssumeRoleProvider(creds *credentials.Credentials, k keyring.Keyring, config *Config) (credentials.Provider, error) {
+        funclog.SimpleStack()
 	sess, err := NewSession(creds, config.Region)
 	if err != nil {
 		return nil, err
@@ -206,6 +213,7 @@ type tempCredsCreator struct {
 }
 
 func (t *tempCredsCreator) provider(config *Config) (credentials.Provider, error) {
+        funclog.SimpleStack()
 	var sourceCredProvider credentials.Provider
 
 	hasStoredCredentials, err := t.keyring.Has(config.ProfileName)
@@ -268,6 +276,7 @@ func mfaDetails(mfaChained bool, config *Config) string {
 
 // NewTempCredentialsProvider creates a credential provider for the given config
 func NewTempCredentialsProvider(config *Config, keyring *CredentialKeyring) (credentials.Provider, error) {
+        funclog.SimpleStack()
 	t := tempCredsCreator{
 		keyring: keyring,
 	}
@@ -276,6 +285,7 @@ func NewTempCredentialsProvider(config *Config, keyring *CredentialKeyring) (cre
 
 // NewTempCredentials returns credentials for the given config
 func NewTempCredentials(config *Config, k *CredentialKeyring) (*credentials.Credentials, error) {
+        funclog.SimpleStack()
 	provider, err := NewTempCredentialsProvider(config, k)
 	if err != nil {
 		return nil, err
@@ -309,6 +319,7 @@ func NewFederationTokenCredentials(profileName string, k *CredentialKeyring, con
 }
 
 func MasterCredentialsFor(profileName string, keyring *CredentialKeyring, config *Config) (string, error) {
+        funclog.SimpleStack()
 	hasMasterCreds, err := keyring.Has(profileName)
 	if err != nil {
 		return "", err

@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/99designs/aws-vault/v6/funclog"
 )
 
 // SessionTokenProvider retrieves temporary credentials from STS using GetSessionToken
@@ -20,6 +21,7 @@ type SessionTokenProvider struct {
 
 // Retrieve generates a new set of temporary credentials using STS GetSessionToken
 func (p *SessionTokenProvider) Retrieve() (credentials.Value, error) {
+        funclog.SimpleStack()
 	session, err := p.GetSessionToken()
 	if err != nil {
 		return credentials.Value{}, err
@@ -37,6 +39,7 @@ func (p *SessionTokenProvider) Retrieve() (credentials.Value, error) {
 func (p *SessionTokenProvider) GetSessionToken() (*sts.Credentials, error) {
 	var err error
 
+        funclog.SimpleStack()
 	input := &sts.GetSessionTokenInput{
 		DurationSeconds: aws.Int64(int64(p.Duration.Seconds())),
 	}
