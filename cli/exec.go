@@ -30,6 +30,7 @@ type ExecCommandInput struct {
 	SessionDuration  time.Duration
 	MinValidDuration time.Duration
 	NoSession        bool
+	ForceNewSession  bool
 }
 
 // AwsCredentialHelperData is metadata for AWS CLI credential process
@@ -57,6 +58,10 @@ func ConfigureExecCommand(app *kingpin.Application, a *AwsVault) {
 
 	cmd.Flag("region", "The AWS region").
 		StringVar(&input.Config.Region)
+
+	cmd.Flag("force-new-session", "Force a new session to be created and update cache").
+		Short('f').
+		BoolVar(&input.ForceNewSession)
 
 	cmd.Flag("mfa-token", "The MFA token to use").
 		Short('t').
@@ -134,8 +139,12 @@ func ExecCommand(input ExecCommandInput, f *vault.ConfigFile, keyring keyring.Ke
 	if input.StartEcsServer && input.NoSession {
 		return fmt.Errorf("Can't use --ecs-server with --no-session")
 	}
+	if input.ForceNewSession && input.NoSession {
+		return fmt.Errorf("Can't use --force-new-session with --no-session")
+	}
 
 	vault.UseSession = !input.NoSession
+	vault.ForceNewSession = input.ForceNewSession
 
 	configLoader := vault.ConfigLoader{
 		File:          f,
